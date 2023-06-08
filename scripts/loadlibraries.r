@@ -10,9 +10,12 @@ if (!requireNamespace("httpgd", quietly = TRUE))
     install.packages("httpgd")
 if (!requireNamespace("ggpubr", quietly = TRUE))
     install.packages("ggpubr")
-
+if(!requireNamespace("cowplot", quietly = TRUE))
+    install.packages("cowplot")
+    
 #Load libraries
 library(tidyverse)
 library(reshape2)
 library(httpgd)
 library(ggpubr)
+library(cowplot)
