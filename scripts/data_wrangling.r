@@ -82,47 +82,46 @@ phyla_richness_eco_summ <- phyla_richness_eco_summ %>%
 #Create figures to find differences between annotation with different databases
 
 #Read data of unclassified sequences with custom db
-unclassified_customdb <- read.csv("inputs/biome_unclassified_count.csv", header = TRUE, sep = ",") %>%
-    dplyr::rename("samples" = "Filename") %>%
-    dplyr::rename("unclassified_sequences" = "Value") %>%
-    dplyr::rename("percentage_unclassified" = "Percentage")
+unclassified_customdb <- read.csv("inputs/biome_class_unclass_count.csv", header = TRUE, sep = ",") %>%
+    dplyr::rename("samples" = "Filename")
 
-#Replace the patter "report" in the column "Filename"
+#Remove dots from colnames
+colnames(unclassified_customdb)[2:ncol(unclassified_customdb)] <- str_replace_all(colnames(unclassified_customdb)[2:ncol(unclassified_customdb)], "\\.", "_")
+
+#Replace the pattern "report" in the column "Filename"
 unclassified_customdb$samples <- str_replace_all(unclassified_customdb$samples, ".report", "")
 
 #Join this information with raw sequences from metadata
 unclassified_customdb <- inner_join(unclassified_customdb, raw_metadata, by = "samples") %>%
-    select(samples, ecosystem, sequence_count_raw, unclassified_sequences,
-            percentage_unclassified)
+    select(samples, ecosystem, Unclassified_sequences,
+            Unclassified_percentage, Classified_percentage,
+            Classified_sequences)
 
-#Calculate classified sequences
-unclassified_customdb$clasified_sequences <- unclassified_customdb$sequence_count_raw - unclassified_customdb$unclassified_sequences
 
-#Calculate the percentage of classified sequences
-unclassified_customdb$percentage_classified <- unclassified_customdb$clasified_sequences/unclassified_customdb$sequence_count_raw*100
+#Calculate the total number of sequences summing classified and unclassified
+unclassified_customdb$sequence_count_raw <- unclassified_customdb$Unclassified_sequences + unclassified_customdb$Classified_sequences
 
 #Add sufix in colnames
 colnames(unclassified_customdb)[2:ncol(unclassified_customdb)] <- paste0(colnames(unclassified_customdb)[2:ncol(unclassified_customdb)], "_customdb")
 
 #Read data of unclassified sequences with standard db
-unclassified_stddb <- read.csv("inputs/stddb_unclassified_count.csv", header = TRUE, sep = ",") %>%
-    dplyr::rename("samples" = "Filename") %>%
-    dplyr::rename("unclassified_sequences" = "Value") %>%
-    dplyr::rename("percentage_unclassified" = "Percentage")
+unclassified_stddb <- read.csv("inputs/stddb_class_unclass_count.csv", header = TRUE, sep = ",") %>%
+    dplyr::rename("samples" = "Filename")
 
-#Replace the patter "report" in the column "Filename"
+#Remove dots from colnames
+colnames(unclassified_stddb)[2:ncol(unclassified_stddb)] <- str_replace_all(colnames(unclassified_stddb)[2:ncol(unclassified_stddb)], "\\.", "_")
+
+#Replace the pattern "report" in the column "Filename"
 unclassified_stddb$samples <- str_replace_all(unclassified_stddb$samples, ".report", "")
 
 #Join this information with raw sequences from metadata
 unclassified_stddb <- inner_join(unclassified_stddb, raw_metadata, by = "samples") %>%
-    select(samples, ecosystem, sequence_count_raw, unclassified_sequences,
-            percentage_unclassified)
+    select(samples, ecosystem, Unclassified_sequences,
+            Unclassified_percentage, Classified_percentage,
+            Classified_sequences)
 
-#Calculate classified sequences
-unclassified_stddb$clasified_sequences <- unclassified_stddb$sequence_count_raw - unclassified_stddb$unclassified_sequences
-
-#Calculate the percentage of classified sequences
-unclassified_stddb$percentage_classified <- unclassified_stddb$clasified_sequences/unclassified_stddb$sequence_count_raw*100
+#Calculate the total number of sequences summing classified and unclassified
+unclassified_stddb$sequence_count_raw <- unclassified_stddb$Unclassified_sequences + unclassified_stddb$Classified_sequences
 
 #Add sufix in colnames
 colnames(unclassified_stddb)[2:ncol(unclassified_stddb)] <- paste0(colnames(unclassified_stddb)[2:ncol(unclassified_stddb)], "_stddb")
@@ -134,7 +133,7 @@ annotated_samples_comparison <- unclassified_stddb %>%
 annotated_samples_comparison <- annotated_samples_comparison %>% select(-ecosystem_customdb)
 
 #Now, calculate the difference of anotated sequences between databases
-annotated_samples_comparison$unclassified_diff <- annotated_samples_comparison$percentage_unclassified_stddb - annotated_samples_comparison$percentage_unclassified_customdb
+annotated_samples_comparison$unclassified_diff <- annotated_samples_comparison$Unclassified_percentage_stddb - annotated_samples_comparison$Unclassified_percentage_customdb
 
 annotated_samples_comparison <- annotated_samples_comparison %>% mutate(ecosystem = str_replace_all(ecosystem_stddb, "animal_host-associated", "Animal host-associated") %>%
     str_replace_all("freshwater", "Freshwater") %>%
